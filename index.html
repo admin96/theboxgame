@@ -264,6 +264,13 @@
 					function(box)
 					{
 						box.draw();
+						// If user resizes window and the box is outside the screen
+						// we'll delete the box and add a new one
+						if (box.x >= CANVAS_WIDTH || box.y >= CANVAS_WIDTH)
+						{
+							removeBox(box);
+							boxes.push(Box());
+						}
 					}
 				);
 				
