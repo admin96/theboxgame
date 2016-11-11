@@ -166,6 +166,14 @@
 					 a.y + a.height > b.y;
 			}
 			
+			function removeBox(box)
+			{
+				var index = boxes.indexOf(box);
+				if (index > -1) {
+					boxes.splice(index, 1);
+				}
+			}
+			
 			/*
 				We'll assign this function to the mouse and touch events so that we can 
 				detect if the clicked/touched area is within a box. If it is, then we 
@@ -196,14 +204,11 @@
 							box.y <= y && box.y + box.age >= y
 						)
 						{
-							var index = boxes.indexOf(box);
-							if (index > -1) {
-								// ... then remove the box from the array and increment
-								// the score and add a new box
-								boxes.splice(index, 1);
-								score++;
-								boxes.push(Box());
-							}
+							// ... then remove the box from the array and increment
+							// the score and add a new box
+							removeBox(box);
+							score++;
+							boxes.push(Box());
 						}
 					}
 				);
