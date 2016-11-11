@@ -1,0 +1,292 @@
+<html>
+	<head>
+		<title>THE BOX GAME</title>
+		<style>
+			body {
+				padding: 0; 
+				margin: 0;
+			} 
+			img{
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			// Canvas initialization code ------------------------------------------//
+			
+			// Store size of the browser window into width and height variables
+			var CANVAS_WIDTH = window.innerWidth;
+			var CANVAS_HEIGHT = window.innerHeight;
+			
+			// Create canvas element. This is where we draw our graphics
+			var canvasElement = document.createElement("canvas");
+			canvasElement.onmousedown = function(){
+				
+			};
+			
+			canvasElement.width = CANVAS_WIDTH;
+			canvasElement.height = CANVAS_HEIGHT;
+			
+			// We need the "canvas context" to draw graphics
+			// We'll just grab it here and store it in a variable
+			var canvas = canvasElement.getContext("2d");
+			
+			// Append canvas to div
+			var div = document.createElement("div");
+			div.setAttribute("align", "center");
+			div.appendChild(canvasElement);
+			
+			// Add the div with the canvas to the body 
+			document.body.appendChild(div);
+			
+			// Assign function to onresize event
+			window.onresize = function() {
+				// Resize canvas to fit the browser window
+				CANVAS_WIDTH = window.innerWidth;
+				CANVAS_HEIGHT = window.innerHeight;
+				canvasElement.width = CANVAS_WIDTH;
+				canvasElement.height = CANVAS_HEIGHT;
+			};
+			
+			/*
+				FPS variable is obviously defining the frames per second. This is how
+				often we're going to update the screen. The setInterval function calls
+				the draw() function approximately 60 times a second (approximately 
+				because setInterval allows for some inconsistencies if the function
+				can't be called 60 times)
+			*/
+			var FPS = 24;
+			setInterval(
+				function() {
+				  //update();
+				  draw();
+				}, 
+				1000/FPS
+			);
+			
+			//----------------------------------------------------------------------//
+			
+			var score = 0;
+			
+			/*
+				This array stores all our boxes. We're going to use an array because
+				we want to have multiple boxes on the screen
+			*/
+			var boxes = [];
+			
+			/*
+				This is needed so that the user can eliminate the boxes by dragging 
+				the mouse while pressing the mouse button. Check onmousemove event
+				of the canvasElement variable
+			*/
+			var mousePressed = false;
+			
+			/*
+				This is the box class. Don't ask me why we have to pass a parameter to
+				this. I saw it done this way on html5rocks and it works perfectly so 
+				I'm going to leave it with a parameter
+			*/
+			function Box(B)
+			{
+				/*
+					We'll initialize the parameter with an empty array. This is needed
+					because we're going to be "returning" B from this function/class 
+					at the end and we need an empty array if there was no parameter 
+					passed
+				*/
+				B = B || {};
+				
+				B.active = true;
+				
+				/*
+					This variable defines the "age" of this box. The age determines 
+					the size of the box. This is the variable we will decrement 
+					while time passes
+				*/
+				B.age = Math.floor(Math.random() * 200) + 100;
+				
+				// We'll call this function when the box is clicked (or pressed)
+				B.click = function()
+				{
+					B.active = false;
+				}
+				
+				// Check if box is active. The box is active if the age > 0
+				B.isActive = function()
+				{
+					if (B.age > 0 && B.active)
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				};
+				
+				/*
+					Function to check if the box is dead. We'll reset the score if 
+					this is the case
+				*/
+				B.isDead = function()
+				{
+					if (B.age <= 0) return true;
+					else return false;
+				};
+				
+				/*
+					Randomly generate the x and y coordinates for this box. We're 
+					subtracting the age from the width and height to make sure that 
+					the box isn't displayed off screen
+				*/
+				B.x = Math.floor( Math.random() * (CANVAS_WIDTH - B.age) );
+				B.y = Math.floor( Math.random() * (CANVAS_HEIGHT - B.age) );
+				
+				// Function which is called to draw the rectangle each frame
+				B.draw = function()
+				{
+					// Draw a black rectangle with the current specs on the canvas
+					canvas.fillStyle = "black";
+					canvas.fillRect(this.x, this.y, this.age, this.age);
+					// Decrement the age so that the rectangle keeps decreasing in size
+					this.age--;
+				};
+				
+				// Return our box object so we can use it and assign it to variables
+				return B;
+			}
+			
+			/*
+				Collision detection function. We'll use this to determine if two boxes
+				are overlapping.
+			*/
+			function collides(a, b) 
+			{
+			  return a.x < b.x + b.width &&
+					 a.x + a.width > b.x &&
+					 a.y < b.y + b.height &&
+					 a.y + a.height > b.y;
+			}
+			
+			/*
+				We'll assign this function to the mouse and touch events so that we can 
+				detect if the clicked/touched area is within a box. If it is, then we 
+				remove the box which was clicked/touched from the array. The mouse/touch
+				events use clientX and clientY from the event to determine the location
+				of the click/touch
+			*/
+			function checkInput()
+			{
+				// The code in the comments was ommited but it would become necessary if
+				// the canvas wasn't fit onto the screen
+				
+				// This variable defines the boundaries of our canvas
+				// var cRect = canvasElement.getBoundingClientRect();
+				// var x = event.clientX - cRect.left;
+				// var y = event.clientY - cRect.top;
+				
+				// X and Y coordinates of event are stored in x and y
+				var x = event.clientX; 
+				var y = event.clientY;
+				
+				boxes.forEach(
+					function(box)
+					{
+						// If click/touch was within boundaries of the box ...
+						if (
+							box.x <= x && box.x + box.age >= x &&
+							box.y <= y && box.y + box.age >= y
+						)
+						{
+							var index = boxes.indexOf(box);
+							if (index > -1) {
+								// ... then remove the box from the array and increment
+								// the score and add a new box
+								boxes.splice(index, 1);
+								score++;
+								boxes.push(Box());
+							}
+						}
+					}
+				);
+			}
+			
+			/*
+				The mouse is pressed when the onmousedown event occurs. We also want
+				the program to be aware of this through the mousePressed variable
+			*/
+			canvasElement.onmousedown = function()
+			{
+				mousePressed = true;
+				checkInput();
+			};
+			
+			// Mouse isn't pressed anymore when the onmouseup event occurs
+			canvasElement.onmouseup = function()
+			{
+				mousePressed = false;
+			};
+			
+			/*
+				If the mouse is pressed while the mouse is moving, we'll allow the user
+				to eliminate the boxes!
+			*/
+			canvasElement.onmousemove = function()
+			{
+				if (mousePressed)
+				{
+					checkInput();
+				}
+			};
+			
+			// This stuff for mobile devices hasn't been tested, but its here
+			canvasElement.touchstart = checkInput;
+			canvasElement.touchmove = checkInput;
+			
+			// Add one box to the boxes array to start with
+			boxes.push(Box());
+			
+			// This is where the magic happens
+			function draw()
+			{
+				/*
+					First of all, we'll clear the screen. This needs to be done so 
+					that the residue from the previous frame isn't visible in the 
+					current frame
+				*/
+				canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+				displayScore();
+				// Draw all the boxes in the array
+				boxes.forEach(
+					function(box)
+					{
+						box.draw();
+					}
+				);
+				
+				// Remove all the inactive boxes
+				boxes = boxes.filter(
+					function(box)
+					{
+						return box.isActive();
+					}
+				);
+				
+				// If the boxes array has nothing in it, then we'll add a box and
+				// reset the score
+				if (boxes.length <= 0)
+				{
+					boxes.push(Box());
+					score = 0;
+				}
+			}
+			
+			function displayScore()
+			{
+				canvas.fillStyle = "black";
+				canvas.fillText("Score: " + score + " ", 20, 20);
+			}
+		</script>
+	</body>
+</html>
