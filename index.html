@@ -109,7 +109,11 @@
 				
 				B.active = true;
 				
+				// Assign random color to each box created
 				B.color = getRandomColor();
+				
+				// Generate value which will be used to decrement the box size (aka age)
+				B.decrement = Math.floor(Math.random() * 10) + 1;
 				
 				/*
 					This variable defines the "age" of this box. The age determines 
@@ -162,7 +166,7 @@
 					canvas.fillStyle = this.color;
 					canvas.fillRect(this.x, this.y, this.age, this.age);
 					// Decrement the age so that the rectangle keeps decreasing in size
-					this.age--;
+					this.age -= this.decrement;
 				};
 				
 				// Return our box object so we can use it and assign it to variables
