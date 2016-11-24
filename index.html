@@ -81,6 +81,17 @@
 			*/
 			var mousePressed = false;
 			
+			// Grabbed from:
+			// http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript
+			function getRandomColor() {
+				var letters = '0123456789ABCDEF';
+				var color = '#';
+				for (var i = 0; i < 6; i++ ) {
+					color += letters[Math.floor(Math.random() * 16)];
+				}
+				return color;
+			}
+			
 			/*
 				This is the box class. Don't ask me why we have to pass a parameter to
 				this. I saw it done this way on html5rocks and it works perfectly so 
@@ -97,6 +108,8 @@
 				B = B || {};
 				
 				B.active = true;
+				
+				B.color = getRandomColor();
 				
 				/*
 					This variable defines the "age" of this box. The age determines 
@@ -146,7 +159,7 @@
 				B.draw = function()
 				{
 					// Draw a black rectangle with the current specs on the canvas
-					canvas.fillStyle = "black";
+					canvas.fillStyle = this.color;
 					canvas.fillRect(this.x, this.y, this.age, this.age);
 					// Decrement the age so that the rectangle keeps decreasing in size
 					this.age--;
