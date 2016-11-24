@@ -179,10 +179,10 @@
 			*/
 			function collides(a, b) 
 			{
-			  return a.x < b.x + b.width &&
-					 a.x + a.width > b.x &&
-					 a.y < b.y + b.height &&
-					 a.y + a.height > b.y;
+			  return a.x < b.x + b.age &&
+					 a.x + a.age > b.x &&
+					 a.y < b.y + b.age &&
+					 a.y + a.age > b.y;
 			}
 			
 			function removeBox(box)
@@ -277,7 +277,6 @@
 					current frame
 				*/
 				canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-				displayScore();
 				// Draw all the boxes in the array
 				boxes.forEach(
 					function(box)
@@ -300,6 +299,8 @@
 						return box.isActive();
 					}
 				);
+				
+				displayScore();
 				
 				// If the boxes array has nothing in it, then we'll add a box and
 				// reset the score
